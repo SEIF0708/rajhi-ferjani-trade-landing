@@ -813,8 +813,8 @@ h1, h2, h3, h4 {
 
 .product-gallery-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(clamp(250px, 100%, 340px), 1fr));
-  gap: 24px;
+  grid-template-columns: repeat(auto-fit, minmax(clamp(280px, 100%, 360px), 1fr));
+  gap: 28px;
   margin-top: 24px;
 }
 
@@ -838,7 +838,7 @@ h1, h2, h3, h4 {
 .gallery-img-container {
   position: relative;
   width: 100%;
-  height: clamp(200px, 45vw, 260px);
+  height: clamp(240px, 55vw, 320px);
   background: #0F140F;
   overflow: hidden;
 }
@@ -847,7 +847,7 @@ h1, h2, h3, h4 {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center;
+  object-position: center 30%;
   transition: transform 0.5s ease;
 }
 
