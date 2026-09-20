@@ -9,7 +9,53 @@ document.addEventListener('DOMContentLoaded', () => {
   initBlogArticles();
   initModals();
   initLanguageSwitcher();
+  initMobileNavigation();
 });
+
+// Mobile Navigation Toggle Controller
+function initMobileNavigation() {
+  const toggleBtn = document.getElementById('mobileToggle');
+  const navLinks = document.querySelector('.nav-links');
+  
+  if (!toggleBtn || !navLinks) return;
+
+  toggleBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const isExpanded = toggleBtn.getAttribute('aria-expanded') === 'true';
+    toggleBtn.setAttribute('aria-expanded', !isExpanded);
+    navLinks.classList.toggle('active');
+
+    // Swap icon between bars and xmark
+    const icon = toggleBtn.querySelector('i');
+    if (icon) {
+      if (navLinks.classList.contains('active')) {
+        icon.className = 'fa-solid fa-xmark';
+      } else {
+        icon.className = 'fa-solid fa-bars';
+      }
+    }
+  });
+
+  // Close nav drawer when clicking any link
+  navLinks.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', () => {
+      navLinks.classList.remove('active');
+      toggleBtn.setAttribute('aria-expanded', 'false');
+      const icon = toggleBtn.querySelector('i');
+      if (icon) icon.className = 'fa-solid fa-bars';
+    });
+  });
+
+  // Close nav drawer when clicking outside
+  document.addEventListener('click', (e) => {
+    if (!toggleBtn.contains(e.target) && !navLinks.contains(e.target)) {
+      navLinks.classList.remove('active');
+      toggleBtn.setAttribute('aria-expanded', 'false');
+      const icon = toggleBtn.querySelector('i');
+      if (icon) icon.className = 'fa-solid fa-bars';
+    }
+  });
+}
 
 // Render Certificates Vault Grid
 function initCertificates() {
@@ -102,6 +148,7 @@ function openCertificateModal(id) {
   `;
 
   modal.classList.add('active');
+  document.body.style.overflow = 'hidden';
 }
 
 // Render Blog Articles (B2B Knowledge Hub)
@@ -145,14 +192,16 @@ function openArticleModal(id) {
       <h3 style="color:var(--primary-olive); font-size:1.3rem; margin-bottom:12px;">${sec.heading}</h3>
       ${sec.text ? `<p style="color:var(--text-muted); line-height:1.7;">${sec.text}</p>` : ''}
       ${sec.table ? `
-        <table class="spec-table">
-          <thead>
-            <tr>${sec.table.headers.map(h => `<th>${h}</th>`).join('')}</tr>
-          </thead>
-          <tbody>
-            ${sec.table.rows.map(row => `<tr>${row.map(cell => `<td>${cell}</td>`).join('')}</tr>`).join('')}
-          </tbody>
-        </table>
+        <div class="table-responsive">
+          <table class="spec-table">
+            <thead>
+              <tr>${sec.table.headers.map(h => `<th>${h}</th>`).join('')}</tr>
+            </thead>
+            <tbody>
+              ${sec.table.rows.map(row => `<tr>${row.map(cell => `<td>${cell}</td>`).join('')}</tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
       ` : ''}
     </div>
   `).join('');
@@ -170,48 +219,66 @@ function openArticleModal(id) {
     </div>
 
     <div style="margin-top:40px; padding-top:20px; border-top:1px solid var(--border-light); text-align:center;">
-      <a href="https://wa.me/905442050779?text=I%20read%20the%20article%20'${encodeURIComponent(art.title)}'%20and%20want%20to%20discuss" target="_blank" class="btn btn-gold btn-lg">
+      <a href="https://wa.me/905442050779?text=I%20read%20the%20article%20'${encodeURIComponent(art.title)}'%20and%20want%20to%20discuss" target="_blank" class="btn btn-gold btn-lg btn-block">
         <i class="fa-brands fa-whatsapp"></i> Discuss This Guide with Marketing Team
       </a>
     </div>
   `;
 
   modal.classList.add('active');
+  document.body.style.overflow = 'hidden';
 }
 
 // Modal Handlers
 function initModals() {
+  const closeModal = (modal) => {
+    if (modal) {
+      modal.classList.remove('active');
+      document.body.style.overflow = '';
+    }
+  };
+
   const certModal = document.getElementById('certModal');
   const certClose = document.getElementById('certModalClose');
-  if (certClose) certClose.onclick = () => certModal.classList.remove('active');
+  if (certClose) certClose.onclick = () => closeModal(certModal);
 
   const articleModal = document.getElementById('articleModal');
   const articleClose = document.getElementById('articleModalClose');
-  if (articleClose) articleClose.onclick = () => articleModal.classList.remove('active');
+  if (articleClose) articleClose.onclick = () => closeModal(articleModal);
 
   const wholesaleModal = document.getElementById('wholesaleModal');
   const wholesaleClose = document.getElementById('wholesaleModalClose');
-  if (wholesaleClose) wholesaleClose.onclick = () => wholesaleModal.classList.remove('active');
+  if (wholesaleClose) wholesaleClose.onclick = () => closeModal(wholesaleModal);
 
   const importModal = document.getElementById('importModal');
   const importClose = document.getElementById('importModalClose');
-  if (importClose) importClose.onclick = () => importModal.classList.remove('active');
+  if (importClose) importClose.onclick = () => closeModal(importModal);
 
   // Trigger modals from data-modal buttons
   document.querySelectorAll('.open-modal-btn').forEach(btn => {
     btn.onclick = () => {
       const modalId = btn.getAttribute('data-modal');
       const target = document.getElementById(modalId);
-      if (target) target.classList.add('active');
+      if (target) {
+        target.classList.add('active');
+        document.body.style.overflow = 'hidden';
+      }
     };
   });
 
   // Close overlay on background click
-  window.onclick = (e) => {
+  window.addEventListener('click', (e) => {
     if (e.target.classList.contains('modal-overlay')) {
-      e.target.classList.remove('active');
+      closeModal(e.target);
     }
-  };
+  });
+
+  // Close modal on Escape key press
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      document.querySelectorAll('.modal-overlay.active').forEach(m => closeModal(m));
+    }
+  });
 }
 
 // Multi-Language Switcher
